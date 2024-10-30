@@ -1,0 +1,279 @@
+<html>
+<head>
+ <meta charset="UTF-8">
+</head>
+<body>
+<script>
+var user="$USER";
+var password="$PASSWORD";
+function get_option_value(id) {
+  e = document.getElementById(id);
+  return e.options[e.selectedIndex].value;
+}
+
+function onRefresh() {
+  fetch("/state", {
+    method: "POST",
+    body: "u=" + encodeURIComponent(user) + "&p=" + encodeURIComponent(password),
+    headers: { "Content-type": "application/x-www-form-urlencoded" }
+  }).then((response) => response.json()
+  ).then((json) => {
+    for (const key in json) {
+      document.getElementById(key).innerHTML = json[key];
+    }
+  });
+}
+function onTradeClick() {
+  onRefresh();
+  dir = get_option_value("dir");
+  venue = get_option_value("venue");
+  fruit = get_option_value("fruit");
+  price = document.getElementById("price").value;
+  qty = document.getElementById("qty").value;
+  query =
+   "u=" + encodeURIComponent(user) +
+   "&p=" + encodeURIComponent(password) +
+   "&dir=" + encodeURIComponent(dir) +
+   "&venue=" + encodeURIComponent(venue) +
+   "&fruit=" + encodeURIComponent(fruit) +
+   "&price=" + encodeURIComponent(price) +
+   "&qty=" + encodeURIComponent(qty);
+
+  fetch("/trade", {
+    method: "POST",
+    body: query,
+    headers: { "Content-type": "application/x-www-form-urlencoded" }
+  }).then(() => onRefresh());
+}
+window.setInterval(onRefresh, 250);
+</script>
+<table width="100%" height="100%">
+ <tr>
+  <td style="vertical-align: top; background-image:url(/zurich.jpg); background-size: 100% 100%; width:50%;">
+   <table width="25%">
+    <tr>
+     <td colspan="5" style="text-align: center;"><h1>Zürich</h1></td>
+    </tr>
+    <tr>
+     <td style="text-align: right">Apples</td>
+     <td style="text-align: right">ask</td>
+     <td id="zurich.apples.ask.price" width="5ch">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="zurich.apples.ask.qty" width="5ch">0</td>
+    </tr>
+    <tr>
+     <td style="text-align: right"></td>
+     <td style="text-align: right">bid</td>
+     <td id="zurich.apples.bid.price">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="zurich.apples.bid.qty">0</td>
+    </tr>
+    <tr height="0.5ex"></tr>
+    <tr>
+     <td style="text-align: right">Bananas</td>
+     <td style="text-align: right">ask</td>
+     <td id="zurich.bananas.ask.price" width="5ch">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="zurich.bananas.ask.qty" width="5ch">0</td>
+    </tr>
+    <tr>
+     <td style="text-align: right"></td>
+     <td style="text-align: right">bid</td>
+     <td id="zurich.bananas.bid.price">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="zurich.bananas.bid.qty">0</td>
+    </tr>
+    <tr height="0.5ex"></tr>
+    <tr>
+     <td style="text-align: right">Tomatoes</td>
+     <td style="text-align: right">ask</td>
+     <td id="zurich.tomatoes.ask.price" width="5ch">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="zurich.tomatoes.ask.qty" width="5ch">0</td>
+    </tr>
+    <tr>
+     <td style="text-align: right"></td>
+     <td style="text-align: right">bid</td>
+     <td id="zurich.tomatoes.bid.price">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="zurich.tomatoes.bid.qty">0</td>
+    </tr>
+   </table>
+  </td>
+  <td style="vertical-align: top; background-image:url(/frankfurt.jpg); background-size: 100% 100%; width:50%;">
+   <table width="25%">
+    <tr>
+     <td colspan="5" style="text-align: center;"><h1>Frankfurt</h1></td>
+    </tr>
+    <tr>
+     <td style="text-align: right">Apples</td>
+     <td style="text-align: right">ask</td>
+     <td id="frankfurt.apples.ask.price" width="5ch">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="frankfurt.apples.ask.qty" width="5ch">0</td>
+    </tr>
+    <tr>
+     <td style="text-align: right"></td>
+     <td style="text-align: right">bid</td>
+     <td id="frankfurt.apples.bid.price">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="frankfurt.apples.bid.qty">0</td>
+    </tr>
+    <tr height="0.5ex"></tr>
+    <tr>
+     <td style="text-align: right">Bananas</td>
+     <td style="text-align: right">ask</td>
+     <td id="frankfurt.bananas.ask.price" width="5ch">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="frankfurt.bananas.ask.qty" width="5ch">0</td>
+    </tr>
+    <tr>
+     <td style="text-align: right"></td>
+     <td style="text-align: right">bid</td>
+     <td id="frankfurt.bananas.bid.price">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="frankfurt.bananas.bid.qty">0</td>
+    </tr>
+    <tr height="0.5ex"></tr>
+    <tr>
+     <td style="text-align: right">Tomatoes</td>
+     <td style="text-align: right">ask</td>
+     <td id="frankfurt.tomatoes.ask.price" width="5ch">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="frankfurt.tomatoes.ask.qty" width="5ch">0</td>
+    </tr>
+    <tr>
+     <td style="text-align: right"></td>
+     <td style="text-align: right">bid</td>
+     <td id="frankfurt.tomatoes.bid.price">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="frankfurt.tomatoes.bid.qty">0</td>
+    </tr>
+   </table>
+  </td>
+ </tr>
+ <tr>
+  <td style="vertical-align: top; background-image:url(/london.jpg); background-size: 100% 100%; width:50%;">
+   <table width="25%">
+    <tr>
+     <td colspan="5" style="text-align: center;"><h1>London</h1></td>
+    </tr>
+    <tr>
+     <td style="text-align: right">Apples</td>
+     <td style="text-align: right">ask</td>
+     <td id="london.apples.ask.price" width="5ch">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="london.apples.ask.qty" width="5ch">0</td>
+    </tr>
+    <tr>
+     <td style="text-align: right"></td>
+     <td style="text-align: right">bid</td>
+     <td id="london.apples.bid.price">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="london.apples.bid.qty">0</td>
+    </tr>
+    <tr height="0.5ex"></tr>
+    <tr>
+     <td style="text-align: right">Bananas</td>
+     <td style="text-align: right">ask</td>
+     <td id="london.bananas.ask.price" width="5ch">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="london.bananas.ask.qty" width="5ch">0</td>
+    </tr>
+    <tr>
+     <td style="text-align: right"></td>
+     <td style="text-align: right">bid</td>
+     <td id="london.bananas.bid.price">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="london.bananas.bid.qty">0</td>
+    </tr>
+    <tr height="0.5ex"></tr>
+    <tr>
+     <td style="text-align: right">Tomatoes</td>
+     <td style="text-align: right">ask</td>
+     <td id="london.tomatoes.ask.price" width="5ch">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="london.tomatoes.ask.qty" width="5ch">0</td>
+    </tr>
+    <tr>
+     <td style="text-align: right"></td>
+     <td style="text-align: right">bid</td>
+     <td id="london.tomatoes.bid.price">0</td>
+     <td style="text-align: right">qty</td>
+     <td id="london.tomatoes.bid.qty">0</td>
+    </tr>
+   </table>
+  </td>
+  <td style="text-align: center; vertical-align: top; width: 50%;">
+   <table width="40vw">
+    <tr>
+     <td colspan="2" style="text-align: center; vertical-align: top;"><h1>$USER</h1></td>
+    </tr>
+    <tr>
+     <td style="min-width: 20vw; text-align: center; vertical-align: top;">
+      <table>
+       <tr><td colspan="2" style="text-align: right;"><h2>Inventory</h2></td></tr>
+       <tr>
+        <td style="text-align: right">Cash</td><td id="inventory.cash">0</td>
+       <tr>
+       </tr>
+        <td style="text-align: right">Apples</td><td id="inventory.apples">0</td>
+       <tr>
+       </tr>
+        <td style="text-align: right">Bananas</td><td id="inventory.bananas">0</td>
+       <tr>
+       </tr>
+        <td style="text-align: right">Tomatoes</td><td id="inventory.tomatoes">0</td>
+       </tr>
+      </table>
+     </td>
+     <td style="min-width: 20vw; text-align: center; vertical-align: top;">
+      <table>
+       <tr><td colspan="2" style="text-align: center;"><h2>Trading</h2></td></tr>
+       <tr>
+        <td></td>
+        <td>
+         <select name="dir" id="dir">
+          <option value="buy">buy</option>
+          <option value="sell">sell</option>
+         </select>
+        </td>
+       </tr>
+       <tr>
+        <td></td>
+        <td>
+         <select name="venue" id="venue">
+          <option value="zurich">zurich</option>
+          <option value="frankfurt">frankfurt</option>
+          <option value="london">london</option>
+         </select>
+        </td>
+       <tr>
+       </tr>
+        <td></td>
+        <td>
+         <select name="fruit" id="fruit">
+          <option value="apples">apples</option>
+          <option value="bananas">bananas</option>
+          <option value="tomatoes">tomatoes</option>
+         </select>
+        </td>
+       <tr>
+       </tr>
+        <td style="text-align: right;">limit price</td><td><input type="text" id="price"></input></td>
+       <tr>
+       </tr>
+        <td style="text-align: right;">limit qty</td><td><input type="text" id="qty"></input></td>
+       <tr>
+       </tr>
+        <td></td><td><button onclick="onTradeClick()">trade</button></td>
+       </tr>
+      </table>
+     </td>
+    </tr>
+   </table>
+  </td>
+ </tr>
+</table>
+</body>
+</html>
