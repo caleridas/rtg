@@ -132,3 +132,12 @@ def buy(venue : str, fruit : str, price : int, qty : int):
 
 def sell(venue : str, fruit : str, price : int, qty : int):
 	return trade(venue, fruit, price, qty, "sell")
+
+
+def KeyBoardLoop():
+	while True:
+		s=input()
+		venue = {"Z": "zurich", "F" : "frankfurt", "L": "london"}[s[0]]
+		action, price  = {"s": (sell, 0) ,  "b": (buy, 999999)}[s[1]]
+		fruit = {"A": "apples", "B": "bananas", "T": "tomatoes"}[s[2]]
+		action(venue=venue,fruit=fruit, price=price, qty=1)
