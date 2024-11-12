@@ -99,6 +99,10 @@ MAIN = read_asset("main.html", "r")
 def handle_mainview(user):
 	return (200, "text/html", MAIN.replace("$USER", user.name).replace("$PASSWORD", user.pw))
 
+VIEW = read_asset("view.html", "r")
+def handle_view(query):
+	return (200, "text/html", VIEW)
+
 REGISTER_SUCCESS = read_asset("register_success.html", "r")
 REGISTER_FAILED = read_asset("register_failed.html", "r")
 def handle_register(query : Dict[str, str]):
@@ -165,6 +169,17 @@ def handle_state(query : Dict[str, str]):
 		else:
 			return (400, "text/plain", "forbidden")
 
+def handle_marketstate(query : Dict[str, str]):
+	with state_lock:
+		s_dict = {}
+		for venue_name, venue in state.venues.items():
+			for fruit_name, fruit in venue.fruits.items():
+				for side_name, side in (("ask", fruit.ask), ("bid", fruit.bid)):
+					s_dict[venue_name + "." + fruit_name + "." + side_name + ".price"] = int(side.price)
+					s_dict[venue_name + "." + fruit_name + "." + side_name + ".qty"] = int(side.qty)
+
+		return (200, "application/json", json.dumps(s_dict))
+
 def image_handler(filename, mime_type="image/jpeg"):
 	IMAGE = read_asset(filename, "rb")
 	def handle_image(query):
@@ -176,9 +191,11 @@ handler_map = {
 	"/register": handle_register,
 	"/trade": handle_trade,
 	"/state": handle_state,
+	"/marketstate": handle_marketstate,
+	"/view": handle_view,
 	"/zurich.jpg": image_handler("zurich.jpg"),
 	"/frankfurt.jpg": image_handler("frankfurt.jpg"),
-	"/london.jpg": image_handler("london.jpg"),
+	"/london.jpg": image_handler("london.jpg")
 }
 
 def update_state(state):
