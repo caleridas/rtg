@@ -25,16 +25,58 @@ class UserInfo:
 		}
 	)
 
+	@staticmethod
+	def from_dict(d):
+		return UserInfo(
+			name=d["name"],
+			pw=d["pw"],
+			cash=d["cash"],
+			inventory={
+				"apples": d["inventory"]["apples"],
+				"bananas": d["inventory"]["bananas"],
+				"tomatoes": d["inventory"]["tomatoes"]
+			}
+		)
+	def to_dict(self):
+		return {
+			"name": self.name,
+			"pw": self.pw,
+			"cash": self.cash,
+			"inventory": self.inventory.copy()
+		}
+
 @dataclasses.dataclass
 class SideInfo:
 	price : int = 100
 	qty : int = 10
+
+	@staticmethod
+	def from_dict(d):
+		return SideInfo(**d)
+
+	def to_dict(self):
+		return self.__dict__
 
 @dataclasses.dataclass
 class FruitInfo:
 	name : str
 	ask : SideInfo = dataclasses.field(default_factory=SideInfo)
 	bid : SideInfo = dataclasses.field(default_factory=SideInfo)
+
+	@staticmethod
+	def from_dict(d):
+		return FruitInfo(
+			name=d["name"],
+			ask=SideInfo.from_dict(d["ask"]),
+			bid=SideInfo.from_dict(d["bid"])
+		)
+
+	def to_dict(self):
+		return {
+			"name": self.name,
+			"ask": self.ask.to_dict(),
+			"bid": self.bid.to_dict()
+		}
 
 @dataclasses.dataclass
 class VenueInfo:
@@ -46,6 +88,26 @@ class VenueInfo:
 			"tomatoes": FruitInfo(name="tomatoes")
 		}
 	)
+	@staticmethod
+	def from_dict(d):
+		return VenueInfo(
+			name=d["name"],
+			fruits={
+				"apples": FruitInfo.from_dict(d["fruits"]["apples"]),
+				"bananas": FruitInfo.from_dict(d["fruits"]["bananas"]),
+				"tomatoes": FruitInfo.from_dict(d["fruits"]["tomatoes"])
+			}
+		)
+
+	def to_dict(self):
+		return {
+			"name": self.name,
+			"fruits": {
+				"apples": self.fruits["apples"].to_dict(),
+				"bananas": self.fruits["bananas"].to_dict(),
+				"tomatoes": self.fruits["tomatoes"].to_dict()
+			}
+		}
 
 @dataclasses.dataclass
 class State:
@@ -59,14 +121,47 @@ class State:
 	)
 	time: float = 0.0
 
+	@staticmethod
+	def from_dict(d):
+		return State(
+			users={u["name"] : UserInfo.from_dict(u) for u in d["users"]},
+			venues = {
+				"zurich": VenueInfo.from_dict(d["venues"]["zurich"]),
+				"frankfurt": VenueInfo.from_dict(d["venues"]["frankfurt"]),
+				"london": VenueInfo.from_dict(d["venues"]["london"]),
+			}
+		)
+
+	def to_dict(self):
+		return {
+			"users": [u.to_dict() for u in self.users.values()],
+			"venues": {
+				"zurich": self.venues["zurich"].to_dict(),
+				"frankfurt": self.venues["zurich"].to_dict(),
+				"london": self.venues["london"].to_dict()
+			}
+		}
+
 def init_qty():
 	return 5 + numpy.random.poisson(3)
 
 def price_increment():
 	return numpy.random.gamma(1, 2)
 
+def save_state():
+	global state_lock
+	global state
+	with state_lock:
+		open("state.json", "w").write(json.dumps(state.to_dict()))
+
 state_lock = threading.Lock()
 state = State()
+
+try:
+	js = json.loads(open("state.json", "r").read())
+	state = State.from_dict(js)
+except:
+	pass
 
 # XXX: implement save and restore so this can be restarted without erasing
 # accounts
@@ -106,13 +201,14 @@ def handle_view(query):
 REGISTER_SUCCESS = read_asset("register_success.html", "r")
 REGISTER_FAILED = read_asset("register_failed.html", "r")
 def handle_register(query : Dict[str, str]):
+	result = (200, "text/html", REGISTER_FAILED)
 	with state_lock:
 		if "u" in query and "p1" in query and "p2" in query and query["u"] not in state.users and query["p1"] == query["p2"]:
 			user = UserInfo(name=query["u"], pw=query["p1"])
 			state.users[query["u"]] = user
-			return (200, "text/html", REGISTER_SUCCESS)
-		else:
-			return (200, "text/html", REGISTER_FAILED)
+			result = (200, "text/html", REGISTER_SUCCESS)
+	save_state()
+	return result
 
 def handle_trade(query : Dict[str, str]):
 	with state_lock:
@@ -229,10 +325,15 @@ def update_state(state):
 				point.bid.qty = init_qty()
 
 def thread_function():
+	save_counter = 30
 	while not thread_exit:
 		time.sleep(2)
 		with state_lock:
 			update_state(state)
+		if save_counter == 0:
+			save_state()
+			save_counter = 30
+		save_counter = save_counter - 1
 
 thread_exit = False
 thread = threading.Thread(target=thread_function)
@@ -276,3 +377,4 @@ finally:
 	with state_lock:
 		thread_exit = True
 	thread.join()
+	save_state()
