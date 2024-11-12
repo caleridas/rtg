@@ -45,6 +45,28 @@ function onTradeClick() {
     headers: { "Content-type": "application/x-www-form-urlencoded" }
   }).then(() => onRefresh());
 }
+function onShortcutKeyPress(element) {
+  if (event.keyCode == 13) {
+    let venue = { "Y": "zurich", "Z": "zurich", "F": "frankfurt", "L": "london" }[element.value[0]];
+    let dir = { "b": "buy", "s": "sell" }[element.value[1]];
+    let price = { "b": 999, "s": 1 }[element.value[1]];
+    let fruit = { "A": "apples", "B": "bananas", "T": "tomatoes" }[element.value[2]];
+    query =
+     "u=" + encodeURIComponent(user) +
+     "&p=" + encodeURIComponent(password) +
+     "&dir=" + encodeURIComponent(dir) +
+     "&venue=" + encodeURIComponent(venue) +
+     "&fruit=" + encodeURIComponent(fruit) +
+     "&price=" + encodeURIComponent(price) +
+     "&qty=" + encodeURIComponent("1");
+    fetch("/trade", {
+      method: "POST",
+      body: query,
+      headers: { "Content-type": "application/x-www-form-urlencoded" }
+    }).then(() => onRefresh());
+    element.value = "";
+  }
+}
 window.setInterval(onRefresh, 250);
 </script>
 <table width="100%" height="100%">
@@ -266,7 +288,11 @@ window.setInterval(onRefresh, 250);
         <td style="text-align: right;">limit qty</td><td><input type="text" id="qty"></input></td>
        <tr>
        </tr>
+       <tr>
         <td></td><td><button onclick="onTradeClick()">trade</button></td>
+       </tr>
+       <tr>
+        <td>Shortcut:</td><td><input type="text" onkeydown="onShortcutKeyPress(this)"></input></td>
        </tr>
       </table>
      </td>
