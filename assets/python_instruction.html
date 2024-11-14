@@ -1,0 +1,215 @@
+<html>
+<head>
+ <meta charset="UTF-8">
+</head>
+<body>
+<h1>Python API</h1>
+<p>
+ Registriere Dich zunächst auf der Web-Seite mit dem Handelssystem mit
+ einem selbstgewählten Nutzernamen und Passwort (verwende <em>KEIN</em>
+ sicheres passwort, sondern z.B. eine triviale Zahlenkombination wie 123).
+</p>
+<p>
+ Nachdem Du Dich mit dem Handeln selbst vertraut gemacht hast, besteht der
+ nächste Schritt darin, mit <tt>Python</tt> zu handeln. Lass Dir zunächst
+ dabei helfen, <tt>Python</tt> und das <tt>rtg</tt>-Modul einzurichten.
+ Anschliessend kannst Du entweder ein Programm schreiben, welches mehrere
+ Python-Befehle ausführt und welches Du mehrfach starten kannst. Oder Du
+ kannst einzelne Befehle direkt eingeben.
+</p>
+<p>
+ Beginne zunächst, indem Du das <tt>rtg</tt> Modul in <tt>Python lädst</tt>
+ (Deine Eingaben werden hier <font color="blue">blau</font> gezeigt):
+</p>
+<pre>
+$ python3
+Python 3.11.2 (main, Aug 26 2024, 07:20:54) [GCC 12.2.0] on linux
+Type "help", "copyright", "credits" or "license" for more information.
+&gt;&gt;&gt; <font color="blue">import rtg⏎</font>
+&gt;&gt;&gt; <font color="blue">rtg.login("abc", "abc", "http://machine:8080")⏎</font>
+</pre>
+<p>
+ Anschliessend kannst Du Dir den jetzigen Zustand des Marktes und Deines
+ Kontos auf folgende Weise anzeigen lassen:
+</p>
+<pre>
+&gt;&gt;&gt; <font color="blue">m, i = rtg.get()⏎</font>
+&gt;&gt;&gt; <font color="blue">print(m)⏎</font>
+State(zurich=Venue(apples=Fruit(ask=Side(price=97, qty=9), bid=Side(price=95, qty=6)), bananas=Fruit(ask=Side(price=124, qty=9), bid=Side(price=120, qty=8)), tomatoes=Fruit(ask=Side(price=115, qty=8), bid=Side(price=110, qty=8))), frankfurt=Venue(apples=Fruit(ask=Side(price=101, qty=9), bid=Side(price=97, qty=7)), bananas=Fruit(ask=Side(price=125, qty=7), bid=Side(price=120, qty=9)), tomatoes=Fruit(ask=Side(price=126, qty=10), bid=Side(price=121, qty=11))), london=Venue(apples=Fruit(ask=Side(price=95, qty=11), bid=Side(price=91, qty=11)), bananas=Fruit(ask=Side(price=125, qty=9), bid=Side(price=121, qty=6)), tomatoes=Fruit(ask=Side(price=118, qty=11), bid=Side(price=115, qty=10))))
+&gt;&gt;&gt; <font color="blue">print(i)⏎</font>
+Inventory(cash=9572, apples=4, bananas=0, tomatoes=0)
+</pre>
+<p>
+ Einzelne Teile der Variablen <tt>m</tt> und <tt>i</tt> kannst Du Dir auf
+ folgende Weise ansehen:
+</p>
+<pre>
+&gt;&gt;&gt; <font color="blue">print(m["zurich"]["apples"])⏎</font>
+Fruit(ask=Side(price=97, qty=9), bid=Side(price=95, qty=6))
+&gt;&gt;&gt; <font color="blue">print(m["zurich"]["apples"].bid.price)⏎</font>
+95
+&gt;&gt;&gt; <font color="blue">print(i.cash)⏎</font>
+9572
+</pre>
+<p>
+ Du kannst neue Variablen definieren um Dir Tipparbeit zu ersparen:
+</p>
+<pre>
+&gt;&gt;&gt; <font color="blue">b1=m["zurich"]["apples"].bid.price⏎</font>
+&gt;&gt;&gt; <font color="blue">b2=m["frankfurt"]["apples"].bid.price⏎</font>
+&gt;&gt;&gt; <font color="blue">a=m["london"]["apples"].ask.price⏎</font>
+&gt;&gt;&gt; <font color="blue">print(b1)⏎</font>
+97
+&gt;&gt;&gt; <font color="blue">print(b2)⏎</font>
+95
+&gt;&gt;&gt; <font color="blue">print(a)⏎</font>
+95
+&gt;&gt;&gt; <font color="blue">print(b1 &gt; a)⏎</font>
+False
+&gt;&gt;&gt; <font color="blue">print(b2 &gt; a)⏎</font>
+False
+</pre>
+<p>
+ Du kannst Früchte an verschiedenen Plätzen verkaufen oder kaufen:
+</p>
+<pre>
+&gt;&gt;&gt; <font color="blue">rtg.buy("london", "apples", 95, 1)⏎</font>
+1
+&gt;&gt;&gt; <font color="blue">rtg.sell("zurich", "apples", 97, 1)⏎</font>
+1
+</pre>
+<p>
+ Dabei haben die Befehle <tt>buy</tt> und <tt>sell</tt> folgende Form:
+</p>
+<ul>
+ <li>
+  <tt>buy(<em>Ort</em>, <em>Frucht</em>, <em>maximaler Preis</em>, <em>maximale Anzahl</em>)</tt>:
+  Versucht die gewünschte Anzahl an Früchten zu kaufen, wobei für jede Frucht <em>höchstens</em>
+  der gesetzte Preis bezahlt wird. (Ist ein preiswerteres Angebot vorhanden, dann wird
+  nur der geringere Preis an diesem Ort bezahlt). Es könnte sein dass weniger
+  als die gewünschte Anzahl der Früchte gekauft wird (z.B. Null), wenn das
+  Preislimit nicht passt.
+ </li>
+ <li>
+  <tt>sell(<em>Ort</em>, <em>Frucht</em>, <em>minimaler Preis</em>, <em>maximale Anzahl</em>)</tt>:
+  Versucht die gewünschte Anzahl an Früchten zu verkaufen, wobei für jede Frucht <em>mindestens</em>
+  der gesetzte Preis bezahlt wird. (Ist ein preiswerteres Angebot vorhanden, dann wird
+  nur der geringere Preis an diesem Ort bezahlt). Es könnte sein dass weniger
+  als die gewünschte Anzahl der Früchte verkauft wird (z.B. null), wenn das
+  Preislimit nicht passt.
+ </li>
+</ul>
+<p>
+ Beide Befehle zeigen an, wieviele Früchte tatsächlich gekauft oder verkauft wurden
+ (es können weniger sein als eigentlich gewollt). Du kannst die Anzahl in
+ einer Variablen speichern um diese später auszuwerten:
+</p>
+<pre>
+&gt;&gt;&gt; <font color="blue">c = rtg.buy("london", "apples", 95, 1)⏎</font>
+&gt;&gt;&gt; <font color="blue">if c == 1: print("Auftrag vollständig ausgeführt")⏎</font>
+... <font color="blue">else: print("Auftrag nicht vollständig ausgeführt")⏎</font>
+... <font color="blue">⏎</font>
+Auftrag vollständig ausgeführt
+</pre>
+<p>
+ Du kannst auch den Import des Moduls <tt>rtg</tt> verändern und Dir dadurch
+ das <tt>rtg.</tt> Präfix vor jedem Befehl sparen:
+</p>
+<pre>
+&gt;&gt;&gt; <font color="blue">from rtg import *⏎</font>
+&gt;&gt;&gt; <font color="blue">login("abc", "abc", "http://machine:8080")⏎</font>
+&gt;&gt;&gt; <font color="blue">m, i = get()⏎</font>
+&gt;&gt;&gt; <font color="blue">buy("london", "apples", 95, 1)⏎</font>
+1
+</pre>
+<p>
+ Für komplexere Befehlssequenzen ist es sinnvoll, diese in einem python-Programm
+ zusammenzufassen welches dann wiederholt ausgeführt werden kann:
+</p>
+<pre>
+<font color="blue">from rtg import *
+login("abc", "abc", "http://machine:8080")
+m, i = get()
+if m["london"]["apples"].ask.price &lt; m["frankfurt"]["apples"].bid.price:
+  print("Kauf-Preis in London niedriger als Verkaufs-Preis in Frankfurt")
+else:
+  print("Es lohnt nicht in London zu kaufen und in Frankfurt zu verkaufen")</font>
+</pre>
+<p>
+ Dieses kannst du dann wiederholt aus der Entwicklungsumgebung oder aus dem
+ Terminal ausführen:
+</p>
+<pre>
+$ <font color="blue">python3 programm.py</font>
+Es lohnt nicht in London zu kaufen und in Frankfurt zu verkaufen
+</pre>
+<h2>Nützliche Python-Konstrukte</h2>
+<p>
+ Folgende Python-Befehle und Konstrukte werden Dir wiederholt nützlich sein:
+</p>
+<ul>
+ <li>
+  <pre>print(<em>var[,var...]</em>)</pre> Schreibe den Inhalt der Variablen
+  auf die Ausgabe, damit Du nachvollziehen kannst was das Programm tut.
+ </li>
+ <li>
+  <pre>
+if <em>Bedingung</em>:
+  <em>Befehl</em>
+  <em>[Befehl...]</em>
+  </pre>
+  Prüft ob die Bedingung zutrifft (z.B. Vergleich zweier Preise). Wenn
+  die Bedingung zutrifft, dann werden die eingerückten Befehle der
+  Reihe nach abgearbeitet.
+ </li>
+ <li>
+  <pre>
+if <em>Bedingung</em>:
+  <em>Befehl</em>
+  <em>[Befehl...]</em>
+else:
+  <em>Befehl</em>
+  <em>[Befehl...]</em>
+  </pre>
+  Wie oben, führt jedoch den zweiten Satz an alternativen Befehlen aus
+  wenn die Bedingung nicht zutrifft.
+ </li>
+ <li>
+  <pre>
+while <em>Bedingung</em>:
+  <em>Befehl</em>
+  <em>[Befehl...]</em>
+  </pre>
+  Prüft ob die Bedingung zutrifft (z.B. Vergleich zweier Preise). Führt
+  alle eingerückten Befehle aus. Danach wird erneut geprüft, ob die Bedingun
+  zutrifft, die Befehle ausgeführt etc. Dies geschieht solange bis
+  die Bedingung irgendwann einmal nicht zutrifft.
+ </li>
+ <li>
+  <pre>
+while True:
+  <em>Befehl</em>
+  <em>[Befehl...]</em>
+  </pre>
+  Wie oben, die Bedingung ist hier als <tt>True</tt> definiert und trifft
+  daher <em>immer</em> zu. D.h. die Wiederholung der Befehle bricht nie ab.
+ </li>
+ <li>
+  <pre>time.sleep(<em>Sekunden</em>)</pre>
+  Wartet die angegebene Anzahl an Sekunden ab. Dies ist nützlich, damit ein
+  Programm nicht zu schnell läuft. Manchmal gibt es einfach nichts sinnvolles
+  zu tun, sondern das Programm muss darauf warten, dass etwas von Interesse
+  passiert.
+ </li>
+ <li>
+  <pre>f = open("file.txt", "w")</pre>
+  Öffnet eine Datei, um in diese zu schreiben (Vorsicht: überschreibt
+  den vorherigen Inhalt der Datei).
+ </li>
+ <li>
+  <pre>f.write(<em>Zeichenkette</em>)</pre>
+  Schreibt eine Zeichenkette in eine zuvor geöffnete Datei.
+ </li>
+</ul>
+</body>
+</html>
