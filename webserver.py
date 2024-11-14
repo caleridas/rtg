@@ -198,6 +198,11 @@ VIEW = read_asset("view.html", "r")
 def handle_view(query):
 	return (200, "text/html", VIEW)
 
+INSTRUCTIONS = read_asset("python_instruction.html", "r")
+def handle_instructions(query):
+	return (200, "text/html", INSTRUCTIONS)
+
+
 REGISTER_SUCCESS = read_asset("register_success.html", "r")
 REGISTER_FAILED = read_asset("register_failed.html", "r")
 def handle_register(query : Dict[str, str]):
@@ -291,7 +296,8 @@ handler_map = {
 	"/view": handle_view,
 	"/zurich.jpg": image_handler("zurich.jpg"),
 	"/frankfurt.jpg": image_handler("frankfurt.jpg"),
-	"/london.jpg": image_handler("london.jpg")
+	"/london.jpg": image_handler("london.jpg"),
+	"/instructions": handle_instructions
 }
 
 def update_state(state):
